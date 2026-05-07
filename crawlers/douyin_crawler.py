@@ -1,110 +1,75 @@
 """
-热搜爬虫
+抖音热搜爬虫
+数据来源：tophub.today（第三方聚合平台）
 """
 
-import time
-import random
 from typing import List
+from datetime import datetime
 from crawlers.base_crawler import BaseCrawler
 from core.models import HotSearchResult, HotSearchItem
 
 
 class DouyinCrawler(BaseCrawler):
+    """抖音热搜爬虫（通过 tophub.today 获取）"""
+
+    API_URL = "https://tophub.today/node-items-by-date"
+    NODE_ID = "221"  # 抖音热榜的 nodeid
+
     def __init__(self):
         super().__init__('douyin')
 
-    def _get_api_url(self):
-        """获取API"""
-        return 'https://www.douyin.com/aweme/v1/web/hot/search/list/'
-
-    def _warmup_session(self):
-        """预访问首页获取Cookie，模拟真实浏览器行为"""
-        try:
-            self.session.get('https://www.douyin.com/', timeout=10)
-            time.sleep(random.uniform(0.5, 1.5))
-        except Exception:
-            pass
+    def _get_api_url(self) -> str:
+        return self.API_URL
 
     def fetch(self) -> HotSearchResult | None:
-        self.logger.info(f"正在爬取{self.platform_name}热门...")
+        """获取抖音热榜"""
+        self.logger.info(f"正在爬取{self.platform_name}热榜...")
+
         try:
-            self._warmup_session()
             url = self._get_api_url()
-            response = self._make_request(url)
-            data = response.json()
-            items = self._parse(data)
+            data = {
+                'p': '1',
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'nodeid': self.NODE_ID,
+            }
+            response = self._make_request(url, method="POST", data=data)
+            items = self._parse(response.json())
             return self._create_result(items)
 
         except Exception as e:
-            self.logger.error(f"{self.platform_name}热门爬取失败:{e}")
-
+            self.logger.error(f"{self.platform_name}热榜爬取失败: {e}")
 
     def _parse(self, data: dict) -> List[HotSearchItem]:
-        """解析API数据"""
-        hot_items = []
+        """解析 tophub.today 返回的 JSON 数据"""
+        items = []
 
-        # 获取主热搜列表
-        word_list = data.get("data", {}).get("word_list", [])
+        if not data or data.get('error'):
+            self.logger.warning(f"API 返回错误: {data}")
+            return items
 
-        for item in word_list:
-            # 基础信息
-            rank = item.get("position", 0)
-            title = item.get("word", "")
+        raw_items = data.get('data', {}).get('items', [])
+        for i, item in enumerate(raw_items):
+            try:
+                title = item.get('title', '').strip()
+                url = item.get('url', '').strip()
 
-            if not title or rank == 0:
+                if not title:
+                    continue
+
+                hot_item = HotSearchItem(
+                    rank=i + 1,
+                    title=title,
+                    url=url if url else None
+                )
+                items.append(hot_item)
+
+            except Exception as e:
+                self.logger.debug(f"解析{self.platform_name}条目失败: {e}")
                 continue
 
-            # 标签处理
-            label = None
-            label_value = item.get("label")
-            if label_value is not None:
-                # 如果有标签URL，可以添加更多标签信息
-                label_url = item.get("label_url")
-                if label_url:
-                    # 根据文档，label是整数，但我们需要字符串
-                    # 这里我们可以将label数值转换为更有意义的描述
-                    label_mapping = {
-                        0: "普通",
-                        1: "新",  # 基于文档中的示例
-                        3: "热",  # 基于文档中的示例
-                        8: "影综",
-                        9: "音乐",
-                        11: "影视",
-                        13: "娱乐",
-                        16: "辟谣"
-                    }
-                    label_desc = label_mapping.get(label_value, f"标签{label_value}")
-                    label = f"{label_desc}"
-                else:
-                    label = str(label_value)
+        return items
 
-            # URL处理 - 使用group_id构造可能的详情页URL
-            url = None
-            group_id = item.get("group_id")
-            if group_id:
-                url = f"https://www.douyin.com/search/{title}"
-
-            # 额外信息
-            extra = {
-                "label": label,
-                "hot_value": item.get("hot_value"),
-                "event_time": item.get("event_time"),
-                "is_new": item.get("is_n1", False),
-            }
-
-            # 清理None值
-            extra = {k: v for k, v in extra.items() if v is not None}
-
-            hot_item = HotSearchItem(
-                rank=rank,
-                title=title,
-                url=url,
-            )
-
-            hot_items.append(hot_item)
-
-        # 按排名排序
-        hot_items.sort(key=lambda x: x.rank)
-        return hot_items
-
-
+if __name__ == '__main__':
+    crawler = DouyinCrawler()
+    result = crawler.fetch()
+    print(result)

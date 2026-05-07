@@ -1,64 +1,76 @@
 """
-热搜爬虫
+知乎热搜爬虫
+数据来源：tophub.today（第三方聚合平台）
 """
 
-import time
-import random
 from typing import List
+from datetime import datetime
 from crawlers.base_crawler import BaseCrawler
 from core.models import HotSearchResult, HotSearchItem
 
 
 class ZhihuCrawler(BaseCrawler):
+    """知乎热搜爬虫（通过 tophub.today 获取）"""
+
+    API_URL = "https://tophub.today/node-items-by-date"
+    NODE_ID = "8"  # 知乎热榜的 nodeid
+
     def __init__(self):
         super().__init__('zhihu')
 
-    def _get_api_url(self):
-        """获取API"""
-        return 'https://www.zhihu.com/api/v4/search/top_search/tabs/hot/items'
-
-    def _warmup_session(self):
-        """预访问首页获取Cookie，模拟真实浏览器行为"""
-        try:
-            self.session.get('https://www.zhihu.com/explore', timeout=10)
-            time.sleep(random.uniform(0.5, 1.5))
-        except Exception:
-            pass
+    def _get_api_url(self) -> str:
+        return self.API_URL
 
     def fetch(self) -> HotSearchResult | None:
-        """获取热搜"""
-        self.logger.info(f"正在爬取{self.platform_name}热门...")
+        """获取知乎热榜"""
+        self.logger.info(f"正在爬取{self.platform_name}热榜...")
 
         try:
-            self._warmup_session()
             url = self._get_api_url()
-            response = self._make_request(url)
-            data = response.json()
-            items = self._parse(data)
-
+            data = {
+                'p': '1',
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'nodeid': self.NODE_ID,
+            }
+            response = self._make_request(url, method="POST", data=data)
+            items = self._parse(response.json())
             return self._create_result(items)
 
         except Exception as e:
-            self.logger.error(f"{self.platform_name}热门爬取失败:{e}")
-
+            self.logger.error(f"{self.platform_name}热榜爬取失败: {e}")
 
     def _parse(self, data: dict) -> List[HotSearchItem]:
-        """解析API数据"""
+        """解析 tophub.today 返回的 JSON 数据"""
         items = []
-        if 'data' in data:
-            for i, item in enumerate(data['data'], 1):
-                try:
-                    title = item.get('query_display', '')
-                    items.append(HotSearchItem(
-                        rank=i,
-                        title=title,
-                        url=f"https://www.zhihu.com/search?q={title}&type=content",
-                    ))
-                except Exception as e:
-                    self.logger.debug(f"解析{self.platform_name}热门项失败: {e}")
+
+        if not data or data.get('error'):
+            self.logger.warning(f"API 返回错误: {data}")
+            return items
+
+        raw_items = data.get('data', {}).get('items', [])
+        for i, item in enumerate(raw_items):
+            try:
+                title = item.get('title', '').strip()
+                url = item.get('url', '').strip()
+
+                if not title:
                     continue
+
+                hot_item = HotSearchItem(
+                    rank=i + 1,
+                    title=title,
+                    url=url if url else None
+                )
+                items.append(hot_item)
+
+            except Exception as e:
+                self.logger.debug(f"解析{self.platform_name}条目失败: {e}")
+                continue
 
         return items
 
 
-
+if __name__ == '__main__':
+    crawler = ZhihuCrawler()
+    result = crawler.fetch()
+    print(result)

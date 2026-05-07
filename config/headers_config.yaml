@@ -23,19 +23,20 @@ platform_headers:
     Sec-Fetch-Site: "same-site"
 
   zhihu:
-    Referer: "https://www.zhihu.com/"
-    Sec-Fetch-Dest: "empty"
-    Sec-Fetch-Mode: "cors"
-    Sec-Fetch-Site: "same-origin"
-    X-Requested-With: "XMLHttpRequest"
+    Referer: "https://tophub.today/"
+    Sec-Fetch-Dest: "document"
+    Sec-Fetch-Mode: "navigate"
+    Sec-Fetch-Site: "cross-site"
 
   bilibili:
     Referer: "https://www.bilibili.com/"
     Origin: "https://www.bilibili.com"
 
   douyin:
-    Referer: "https://www.douyin.com/"
-    Origin: "https://www.douyin.com"
+    Referer: "https://tophub.today/"
+    Sec-Fetch-Dest: "document"
+    Sec-Fetch-Mode: "navigate"
+    Sec-Fetch-Site: "cross-site"
 
   kuaishou:
     Referer: "https://www.kuaishou.com/"
@@ -55,8 +56,10 @@ platform_headers:
     Origin: "https://www.sina.com.cn"
 
   toutiao:
-    Referer: "https://www.toutiao.com/"
-    Origin: "https://www.toutiao.com"
+    Referer: "https://tophub.today/"
+    Sec-Fetch-Dest: "document"
+    Sec-Fetch-Mode: "navigate"
+    Sec-Fetch-Site: "cross-site"
 
   huxiu:
     origin: 'https://www.huxiu.com'
