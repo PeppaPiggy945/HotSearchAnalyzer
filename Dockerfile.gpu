@@ -15,21 +15,25 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 安装 Python 3.12 + 系统依赖
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|archive.ubuntu.com|mirrors.tencent.com|g' /etc/apt/sources.list \
+    && sed -i 's|security.ubuntu.com|mirrors.tencent.com|g' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
     software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update && apt-get install -y \
     python3.12 \
     python3.12-venv \
     python3.12-dev \
-    python3-pip \
+    python3.12-distutils \
     gcc \
     g++ \
     curl \
     git \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
+    && python3.12 -m ensurepip --upgrade \
+    && python3.12 -m pip install --upgrade pip
 
 # 设置工作目录
 WORKDIR /app
@@ -46,9 +50,10 @@ ENV PYTHONUNBUFFERED=1 \
 COPY requirements.txt .
 
 # 安装 Python 依赖（先装 CUDA 版 torch，再装其余依赖）
-RUN pip install --no-cache-dir --break-system-packages \
+RUN python3.12 -m pip install --no-cache-dir --break-system-packages \
     torch>=2.1.0 --index-url https://download.pytorch.org/whl/cu121 \
-    && pip install --no-cache-dir --break-system-packages -r requirements.txt
+    && python3.12 -m pip install --no-cache-dir --break-system-packages \
+    -i https://mirrors.tencent.com/pypi/simple/ -r requirements.txt
 
 # 复制项目文件
 COPY . .
