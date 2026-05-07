@@ -1,0 +1,94 @@
+# config/headers_config.yaml
+# 平台特定请求头配置
+# 注意：这些头部会与settings.py中的DEFAULT_HEADERS合并
+
+# 通用请求头配置
+# 适用于所有平台的基础请求头
+common_headers:
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0'
+  'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
+  'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8'
+  'accept-encoding': 'gzip, deflate, br'
+  'dnt': '1'
+  'upgrade-insecure-requests': '1'
+
+
+
+platform_headers:
+  # 互联网类平台
+  weibo:
+    Referer: "https://s.weibo.com/"
+    Sec-Fetch-Dest: "document"
+    Sec-Fetch-Mode: "navigate"
+    Sec-Fetch-Site: "same-site"
+
+  zhihu:
+    Referer: "https://www.zhihu.com/"
+    Sec-Fetch-Dest: "empty"
+    Sec-Fetch-Mode: "cors"
+    Sec-Fetch-Site: "same-origin"
+    X-Requested-With: "XMLHttpRequest"
+
+  bilibili:
+    Referer: "https://www.bilibili.com/"
+    Origin: "https://www.bilibili.com"
+
+  douyin:
+    Referer: "https://www.douyin.com/"
+    Origin: "https://www.douyin.com"
+
+  kuaishou:
+    Referer: "https://www.kuaishou.com/"
+    Origin: "https://www.kuaishou.com"
+
+  # 新闻类平台
+  cctv:
+    Referer: "https://news.cctv.com/"
+    Origin: "https://news.cctv.com"
+
+  people:
+    Referer: "https://www.people.com.cn/"
+    Origin: "https://www.people.com.cn"
+
+  sina:
+    Referer: "https://www.sina.com.cn/"
+    Origin: "https://www.sina.com.cn"
+
+  toutiao:
+    Referer: "https://www.toutiao.com/"
+    Origin: "https://www.toutiao.com"
+
+  huxiu:
+    origin: 'https://www.huxiu.com'
+    referer: 'https://www.huxiu.com/'
+
+  thepaper:
+    origin: 'https://www.thepaper.cn'
+    referer: 'https://www.thepaper.cn/'
+
+
+  # 金融类平台
+  wallstreetcn:
+    Referer: "https://www.wallstreetcn.com/"
+    Origin: "https://www.wallstreetcn.com"
+
+  caixin:
+    Referer: "https://www.caixin.com/"
+    Origin: "https://www.caixin.com"
+
+
+  # 科技类平台
+  kr36:
+    Referer: "https://www.36kr.com/"
+    Origin: "https://www.36kr.com"
+
+  ithome:
+    Referer: "https://www.ithome.com/"
+    Origin: "https://www.ithome.com"
+
+  tieba:
+    Referer: "https://tieba.baidu.com/"
+    Origin: "https://tieba.baidu.com"
+
+
+

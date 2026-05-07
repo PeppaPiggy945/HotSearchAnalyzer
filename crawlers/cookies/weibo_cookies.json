@@ -1,0 +1,44 @@
+[
+  {
+    "name": "XSRF-TOKEN",
+    "value": "XTEYhmp-jGJ-sYO3Ux4kcy_d",
+    "domain": "www.weibo.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "SVB",
+    "value": "_2AkMegAWof8NxqwJRmvwUxGzgaYV1zg_EieKo3PRzJRMxHRl-yT9kqmULtRB6NQArR8_DQEDkS2QYrAlZBg1RUxfmukTW",
+    "domain": ".passport.weibo.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "SRT",
+    "value": "D.QqHBTrsbSrEQU-RtOeYoWr9NUQS3PQYG5cWYdPRo5cWaMdbbN-0q4EHwNbHi5mYNUCsuPDbhVdnoR3MNAZSK44Ep4eY3MrSPidMMJ%21iLdmJnN%21u34EE-U3RpM4WS5A77%2AB.vAflW-P9Rc0lR-ykKDvnJqiQVbiRVPBtS%21r3J8sQVqbgVdWiMZ4siOzu4DbmKPWFdFtnUGBKTbAlNGvtMFJnNeHJT-oT",
+    "domain": ".passport.weibo.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "SRF",
+    "value": "1776061087",
+    "domain": ".passport.weibo.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "SUB",
+    "value": "_2AkMegAWof8NxqwJRmvwUxGzgaYV1zg_EieKo3PRzJRMxHRl-yT9kql1ctRB6NQArRxwGFU5dQ2COXC0JNwPQvov2EGYy",
+    "domain": ".weibo.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "SUBP",
+    "value": "0033WrSXqPxfM72-Ws9jqgMF55529P9D9WFXn0lpNjT.Hp8Dc0JrLklZ",
+    "domain": ".weibo.com",
+    "path": "/",
+    "secure": false
+  }
+]

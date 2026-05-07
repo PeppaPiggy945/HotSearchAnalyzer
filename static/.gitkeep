@@ -1,0 +1,26 @@
+/**
+ * 前端静态资源目录
+ *
+ * 如需将 gui.html 中的内联 CSS/JS 拆分为独立文件，
+ * 请在此目录下组织：
+ *
+ *   static/
+ *   ├── css/
+ *   │   └── gui.css          # 主样式表
+ *   ├── js/
+ *   │   ├── app.js            # 应用入口
+ *   │   ├── api.js            # API 请求封装
+ *   │   ├── pages/
+ *   │   │   ├── dashboard.js  # Dashboard 页
+ *   │   │   ├── operations.js # 操作中心页
+ *   │   │   ├── platforms.js  # 平台管理页
+ *   │   │   ├── config.js     # 配置管理页
+ *   │   │   ├── scheduler.js  # 定时任务页
+ *   │   │   ├── outputs.js    # 输出浏览页
+ *   │   │   └── logs.js       # 日志查看页
+ *   │   └── components/       # 通用 UI 组件
+ *   └── assets/               # 图片、字体等静态资源
+ *
+ * 在 Flask app 中已配置 static_url_path='/static'
+ * 前端可直接通过 /static/css/gui.css 等路径引用
+ */

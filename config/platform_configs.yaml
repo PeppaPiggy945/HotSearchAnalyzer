@@ -1,0 +1,172 @@
+platforms:
+  baidu:
+    base_url: https://www.baidu.com
+    category: news
+    crawler_class: BaiduCrawler
+    crawler_module: crawlers.baidu_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 百度
+    sub_category: official
+  bilibili:
+    base_url: https://www.bilibili.com
+    category: entertainment
+    crawler_class: BilibiliCrawler
+    crawler_module: crawlers.bilibili_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: B站
+    sub_category: internet
+  caixin:
+    base_url: https://www.caixin.com
+    category: finance
+    crawler_class: CaixinCrawler
+    crawler_module: crawlers.caixin_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 财新
+    sub_category: public
+  cctv:
+    base_url: https://news.cctv.com/
+    category: news
+    crawler_class: CCTVNewsCrawler
+    crawler_module: crawlers.cctv_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 央视新闻
+    sub_category: official
+  douyin:
+    base_url: https://www.douyin.com
+    category: entertainment
+    crawler_class: DouyinCrawler
+    crawler_module: crawlers.douyin_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 抖音
+    sub_category: internet
+  huxiu:
+    base_url: https://www.huxiu.com
+    category: news
+    crawler_class: HuxiuCrawler
+    crawler_module: crawlers.huxiu_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 虎嗅
+    sub_category: public
+  ithome:
+    base_url: https://www.ithome.com
+    category: tech
+    crawler_class: IthomeCrawler
+    crawler_module: crawlers.ithome_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: IT之家
+    sub_category: public
+  kr36:
+    base_url: https://www.36kr.com
+    category: finance
+    crawler_class: Kr36Crawler
+    crawler_module: crawlers.kr36_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 36氪
+    sub_category: public
+  kuaishou:
+    base_url: https://www.kuaishou.com
+    category: entertainment
+    crawler_class: KuaishouCrawler
+    crawler_module: crawlers.kuaishou_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 快手
+    sub_category: internet
+  people:
+    base_url: https://www.people.com.cn
+    category: news
+    crawler_class: PeopleDailyCrawler
+    crawler_module: crawlers.peopledaily_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 人民日报
+    sub_category: official
+  sina:
+    base_url: https://www.sina.com.cn
+    category: news
+    crawler_class: SinaCrawler
+    crawler_module: crawlers.sina_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 新浪
+    sub_category: public
+  tencentnews:
+    base_url: https://tophub.today
+    category: news
+    crawler_class: TencentNewsCrawler
+    crawler_module: crawlers.tencentnews_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 腾讯新闻
+    sub_category: portal
+  thepaper:
+    base_url: https://www.thepaper.cn
+    category: news
+    crawler_class: PaperCrawler
+    crawler_module: crawlers.thepaper_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 澎湃新闻
+    sub_category: official
+  tieba:
+    base_url: https://tieba.baidu.com
+    category: social
+    crawler_class: TiebaCrawler
+    crawler_module: crawlers.tieba_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 百度贴吧
+    sub_category: internet
+  toutiao:
+    base_url: https://www.toutiao.com
+    category: news
+    crawler_class: ToutiaoCrawler
+    crawler_module: crawlers.toutiao_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 今日头条
+    sub_category: public
+  wallstreetcn:
+    base_url: https://www.wallstreetcn.com
+    category: finance
+    crawler_class: WallCrawler
+    crawler_module: crawlers.wallstreetcn_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 华尔街见闻
+    sub_category: public
+  wechat:
+    base_url: https://tophub.today
+    category: social
+    crawler_class: WeChatCrawler
+    crawler_module: crawlers.wechat_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 微信
+    sub_category: internet
+  weibo:
+    base_url: https://www.weibo.com
+    category: social
+    crawler_class: WeiboCrawler
+    crawler_module: crawlers.weibo_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 微博
+    sub_category: internet
+  zhihu:
+    base_url: https://www.zhihu.com
+    category: social
+    crawler_class: ZhihuCrawler
+    crawler_module: crawlers.zhihu_crawler
+    default_fetch_items: 15
+    enabled: true
+    name: 知乎
+    sub_category: internet

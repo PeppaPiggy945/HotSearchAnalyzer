@@ -1,0 +1,184 @@
+# 用户配置文件模板
+# 使用方法：复制此文件为 user_config.yaml，然后根据实际情况修改配置
+
+# ==================== 通知配置 ====================
+notification:
+  enabled: false  # 是否启用通知
+  email:
+    enabled: false
+    smtp_server: 'smtp.qq.com'
+    smtp_port: 465  # QQ邮箱SSL端口（必须使用465）
+    sender: 'your-email@qq.com'
+    password: 'your-authorization-code'  # 重要：这是授权码，不是邮箱密码！
+    # 获取QQ邮箱授权码方法：
+    # 1. 登录QQ邮箱网页版 (https://mail.qq.com)
+    # 2. 点击设置 -> 账户
+    # 3. 开启【IMAP/SMTP服务】
+    # 4. 按照提示发送短信验证
+    # 5. 获取16位授权码，复制保存
+    # 6. 将授权码填入上面的 password 字段
+    # 详细说明请参考：EMAIL_SETUP.md
+    recipients: ['recipient@qq.com']  # 收件人邮箱列表
+
+# ==================== 分析配置 ====================
+analysis:
+  report:
+    save_to_file: true
+    output_dir: 'outputs/analysis'
+
+# ==================== LLM 分析配置 ====================
+llm:
+  enabled: true  # 是否启用AI智能分析
+  mode: 'api'  # 推荐 'api'（远程API，低成本低配置）；可选 'local'（本地模型，需GPU或大内存）
+  device: 'auto'  # 'auto', 'cpu', 'cuda', 'mps'（仅 mode=local 时生效）
+  model_name: 'qwen/Qwen2.5-3B-Instruct'  # 本地模型名称（mode=local时使用）
+
+  # API配置（mode=api时使用）— 推荐 qwen3.5-flash，约 ¥0.001/千tokens
+  api_base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+  api_key: 'your-api-key-here'  # 阿里云百炼平台: https://bailian.console.aliyun.com/
+  api_model: 'qwen3.5-flash'
+
+  # 批处理配置
+  batch_size: 20
+  max_new_tokens: 10
+  temperature: 0.1
+
+  # 支持的API平台（均兼容 OpenAI 接口格式）
+  # 通义千问: https://dashscope.aliyuncs.com/compatible-mode/v1  ← 推荐，国内最低价
+  # DeepSeek: https://api.deepseek.com/v1
+  # OpenAI:   https://api.openai.com/v1
+  # Claude:   https://api.anthropic.com/v1
+
+# ==================== AI 洞察报告配置 ====================
+ai_insight:
+  enabled: false
+  days: 3  # 分析最近几天的数据
+  api_base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+  api_key: 'your-api-key-here'
+  api_model: 'qwen3.6-plus'
+  max_tokens: 8000
+  temperature: 0.7
+  timeout: 300  # 请求超时时间（秒）
+  max_retries: 2
+  report:
+    output_dir: 'outputs/insight'
+    filename_prefix: 'ai_insight'
+  preprocessing:
+    enabled: true
+    min_heat_score: 10  # 最低热度分数
+    max_events_detail: 40  # 每个平台最多分析的事件数
+    similarity_threshold: 0.55  # 相似度阈值
+
+# ==================== Prompt 配置 ====================
+prompt:
+  auto_generate: false
+  output_dir: 'outputs/prompts'
+  template: 'templates/analysis_prompt.md'
+
+# ==================== 日志配置 ====================
+logging:
+  level: 'INFO'  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  console: true
+  file: true
+  file_path: 'logs/service.log'
+
+# ==================== 服务配置 ====================
+service:
+  port: 8080  # 服务端口（生产环境建议使用8080以上端口）
+  api_key: 'your-secret-api-key-here'  # API访问密钥
+  debug: false  # 调试模式
+
+# ==================== 关键词追踪配置 ====================
+keyword_tracking:
+  enabled: true
+  groups:
+    - name: '游戏'
+      keywords: ['原神', '英雄联盟', '王者荣耀']
+    - name: '国际局势'
+      keywords: ['乌克兰', '俄罗斯', '中东', '巴以']
+    - name: '科技'
+      keywords: ['AI', '人工智能', '芯片', '华为']
+    - name: '金融'
+      keywords: ['股市', '基金', '人民币', '美元']
+  max_matches_per_keyword: 5
+
+# ==================== 爬取配置 ====================
+crawl:
+  # 启用的平台列表
+  enabled_platforms: ['weibo', 'zhihu', 'baidu', 'douyin', 'toutiao']
+
+  # 每次爬取的条数
+  fetch_count: 10
+
+  # 请求配置
+  request_delay: 1.0  # 请求间隔（秒）
+  max_retries: 3  # 最大重试次数
+  timeout: 30  # 超时时间（秒）
+
+  # 并发配置
+  max_concurrent_requests: 5  # 最大并发请求数
+
+# ==================== 定时任务配置 ====================
+scheduler:
+  enabled: false  # 是否启用定时任务
+
+  # Cron表达式（秒 分 时 日 月 周）
+  # 示例：
+  # - '0 */2 * * *' 每2小时执行一次
+  # - '0 9 * * *' 每天早上9点执行
+  # - '*/30 * * * *' 每30分钟执行一次
+  cron_expression: '0 */2 * * *'
+
+  # 或使用间隔时间（秒）
+  # interval: 7200  # 2小时
+
+  # 任务执行配置
+  auto_cleanup: true  # 自动清理旧数据
+  fetch_on_start: true  # 启动时立即执行一次
+
+# ==================== 数据清理配置 ====================
+cleanup:
+  enabled: true
+  max_files_per_platform: 80  # 每个平台保留的文件数
+  keep_days: 30  # 保留天数
+  auto_cleanup_after_fetch: false  # 每次爬取后自动清理
+
+# ==================== 代理配置（可选）====================
+proxy:
+  enabled: false
+  http_proxy: 'http://127.0.0.1:7890'
+  https_proxy: 'http://127.0.0.1:7890'
+  no_proxy: 'localhost,127.0.0.1'
+
+# ==================== 浏览器驱动配置（可选）====================
+browser:
+  headless: true  # 无头模式
+  driver_path: ''  # 浏览器驱动路径（留空则自动下载）
+  timeout: 30  # 页面加载超时时间（秒）
+
+# ==================== User-Agent 配置 ====================
+user_agent:
+  enabled: true
+  custom_ua: ''  # 自定义User-Agent（留空则随机）
+
+# ==================== 高级配置 ====================
+advanced:
+  # 缓存配置
+  cache_enabled: true
+  cache_ttl: 3600  # 缓存有效期（秒）
+
+  # 重试策略
+  retry_multiplier: 1.5  # 重试间隔倍数
+  retry_delay: 2.0  # 初始重试延迟（秒）
+
+  # 数据保留策略
+  data_compression: false  # 数据压缩
+  backup_enabled: false  # 数据备份
+  backup_dir: 'backups'
+
+# ==================== 开发/测试配置 ====================
+development:
+  test_mode: false  # 测试模式（不实际请求网络）
+  mock_data: false  # 使用模拟数据
+  verbose_logging: false  # 详细日志
+  debug_output: false  # 调试输出

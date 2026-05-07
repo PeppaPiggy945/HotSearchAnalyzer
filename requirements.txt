@@ -1,0 +1,25 @@
+# Requires: Python >=3.12
+
+pyyaml~=6.0.3
+
+requests>=2.32.5
+beautifulsoup4~=4.14.3
+fake-useragent~=1.5.1
+
+# NLP 分析依赖
+jieba~=0.42.1
+scikit-learn~=1.6.1
+numpy>=1.24.0,<2.1.0
+
+# 服务和API依赖
+flask~=3.0.0
+flask-cors~=4.0.0
+apscheduler>=3.10.0
+
+# LLM 本地推理依赖（可选，缺失时降级为关键词分类）
+# torch 安装方式取决于 CUDA 版本，请参考 https://pytorch.org/get-started/locally/
+# CPU only:  pip install torch --index-url https://download.pytorch.org/whl/cpu
+# CUDA 12.1: pip install torch --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1.0
+transformers>=4.40.0
+modelscope>=1.18.0

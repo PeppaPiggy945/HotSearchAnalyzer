@@ -1,0 +1,122 @@
+# analytics_config.yaml
+# 分析模块配置文件
+
+# 分析配置
+analysis:
+  # 数据目录
+  data_dir: "outputs/HotSearchResult"
+
+  # 报告输出目录
+  output_dir: "outputs"
+
+  # 报告文件名格式
+  report_filename_pattern: "analysis_report_{date}_{time}.txt"
+
+  # 是否自动保存报告
+  auto_save: true
+
+  # 是否打印报告到控制台
+  verbose: true
+
+# 分类显示配置
+category_display:
+  social:
+    name: "社交"
+    icon: "💬"
+    color: "blue"
+
+  news:
+    name: "新闻"
+    icon: "📰"
+    color: "red"
+
+  finance:
+    name: "金融"
+    icon: "💰"
+    color: "green"
+
+  tech:
+    name: "科技"
+    icon: "💻"
+    color: "cyan"
+
+  entertainment:
+    name: "娱乐"
+    icon: "🎮"
+    color: "purple"
+
+subcategory_display:
+  official:
+    name: "官方"
+    icon: "🏛️"
+
+  public:
+    name: "民间"
+    icon: "👥"
+
+  internet:
+    name: "互联网"
+    icon: "🌐"
+
+# LLM 分类优化
+llm:
+  # LLM 分类的事件数量上限（仅对热度最高的 N 个事件使用 LLM，其余降级为快速分类）
+  # 设为 0 表示不限制（所有事件都走 LLM），配合分类结果缓存可有效减少重复推理
+  max_events: 0
+
+  # LLM 分类缓存设置
+  cache:
+    # 缓存条目过期天数（超过此天数未命中的条目将被自动清理）
+    expire_days: 7
+    # 缓存条目总数上限（超出时按最久未访问淘汰）
+    max_entries: 500
+
+# 话题过滤
+filter:
+  # 最低热度阈值（低于此值的话题将被过滤，不进入聚类和分类流程）
+  # 热度分由平台数、排名、相似话题数综合计算，满分约 105
+  # 设为 0 表示不过滤
+  # 建议: 10~20（过滤单平台底部条目），30（较严格，仅保留跨平台或高排名话题）
+  min_heat_score: 15
+
+# 分析规则
+rules:
+  # 数据分布不均的阈值（最小/最大比例）
+  distribution_threshold: 0.3
+
+  # 最小推荐平台数量
+  min_platform_count: 5
+
+  # 热搜标题示例数量
+  sample_title_count: 2
+
+  # 最大显示标题长度
+  max_title_display_length: 60
+
+# 报告格式
+report_format:
+  # 分隔符
+  main_separator: "="
+  sub_separator: "─"
+
+  # 分隔符长度
+  separator_length: 80
+
+  # 是否显示emoji
+  show_emoji: true
+
+  # 是否显示颜色（终端）
+  show_color: false
+
+# 导出选项
+export:
+  # 导出格式: txt, json, html
+  formats:
+    - txt
+    - json
+
+  # JSON缩进
+  json_indent: 2
+
+  # 是否包含原始数据
+  include_raw_data: false

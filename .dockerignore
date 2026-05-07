@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# LLM缓存
+.llm_cache/
+
+# 模型文件
+.model_cache/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# 日志
+logs/*.log
+
+# Cookie文件
+crawlers/cookies/*.json
+!crawlers/cookies/__init__.py
+
+# 输出文件
+outputs/
+!outputs/.gitkeep
+
+# 配置文件（敏感）
+.env
+config/user_config.yaml
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 系统文件
+Thumbs.db
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档
+README.md
+*.md
+docs/
+
+# 测试和示例
+tests/
+examples/
+*.test.py
+
+# 备份和临时文件
+*.bak
+*.backup
+*.tmp
+*.temp
+backups/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# 其他
+.DS_Store
+.env.*.local

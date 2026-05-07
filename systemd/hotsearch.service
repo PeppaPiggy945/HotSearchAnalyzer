@@ -1,0 +1,39 @@
+[Unit]
+Description=HotSearch Information Service - 热点信息搜集系统
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hotsearch
+Group=hotsearch
+WorkingDirectory=/opt/hotsearch
+Environment="PATH=/opt/hotsearch/venv/bin"
+Environment="HOTSEARCH_ENVIRONMENT=production"
+Environment="HOTSEARCH_LOG_LEVEL=INFO"
+
+# 启动命令
+ExecStart=/opt/hotsearch/venv/bin/python /opt/hotsearch/main.py server
+
+# 重启策略
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# 日志配置
+StandardOutput=append:/opt/hotsearch/logs/service.log
+StandardError=append:/opt/hotsearch/logs/service_error.log
+
+# 资源限制
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# 安全配置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/hotsearch/outputs /opt/hotsearch/logs /opt/hotsearch/.llm_cache /opt/hotsearch/.model_cache /opt/hotsearch/backups
+
+[Install]
+WantedBy=multi-user.target

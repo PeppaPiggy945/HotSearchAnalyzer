@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HotSearch Crawler — 管理面板</title>
+  <link rel="stylesheet" href="/static/gui.css?v=11">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Mobile hamburger -->
+  <button class="sidebar-toggle" id="sidebar-toggle" title="展开菜单">☰</button>
+
+  <!-- ═══ Sidebar ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">📈</span>
+      <span>热搜管理面板</span>
+      <button class="theme-toggle" id="theme-toggle" title="切换主题">🌙</button>
+      <button class="theme-toggle" id="sidebar-collapse" title="收起侧栏" style="right:12px;left:auto;font-size:14px">◀</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span class="nav-text">仪表盘</span></a>
+      <a class="nav-item" data-page="operations"><span class="nav-icon">▶</span><span class="nav-text">操作中心</span></a>
+      <a class="nav-item" data-page="reports"><span class="nav-icon">📑</span><span class="nav-text">报告展示</span></a>
+      <a class="nav-item" data-page="user-config"><span class="nav-icon">👤</span><span class="nav-text">用户配置</span></a>
+      <a class="nav-item" data-page="platforms"><span class="nav-icon">🌐</span><span class="nav-text">平台管理</span></a>
+      <a class="nav-item" data-page="outputs"><span class="nav-icon">📂</span><span class="nav-text">文件管理</span></a>
+      <a class="nav-item" data-page="config-editor"><span class="nav-icon">⚙</span><span class="nav-text">配置编辑</span></a>
+      <a class="nav-item" data-page="logs"><span class="nav-icon">📋</span><span class="nav-text">日志查看</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <span>HotSearch Crawler v2.0</span>
+      <button class="btn btn-sm btn-ghost" onclick="changeApiKey()" title="更换密钥" style="padding:2px 6px;font-size:11px">🔑</button>
+    </div>
+  </aside>
+
+  <!-- ═══ Main Content ═══ -->
+  <div class="main">
+
+    <!-- ── Dashboard ── -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header"><h2>仪表盘</h2><p>服务运行状态总览</p></div>
+      <div class="card"><div class="card-body">
+        <div class="status-grid">
+          <div class="status-item"><div class="status-label">服务状态</div><div class="status-value" id="st-status">-</div></div>
+          <div class="status-item"><div class="status-label">调度器</div><div class="status-value" id="st-scheduler">-</div></div>
+          <div class="status-item"><div class="status-label">爬取次数</div><div class="status-value" id="st-fetches">0</div></div>
+          <div class="status-item"><div class="status-label">分析次数</div><div class="status-value" id="st-analyses">0</div></div>
+          <div class="status-item"><div class="status-label">Prompt次数</div><div class="status-value" id="st-prompts">0</div></div>
+          <div class="status-item"><div class="status-label">可用平台</div><div class="status-value" id="st-platforms">-</div></div>
+        </div>
+      </div></div>
+      <div class="card">
+        <div class="card-header">最近操作时间</div>
+        <div class="card-body"><table><tbody>
+          <tr><td style="width:100px;color:var(--text-faint)">最近爬取</td><td id="st-last-fetch">-</td></tr>
+          <tr><td style="color:var(--text-faint)">最近分析</td><td id="st-last-analysis">-</td></tr>
+          <tr><td style="color:var(--text-faint)">最近生成Prompt</td><td id="st-last-prompt">-</td></tr>
+          <tr><td style="color:var(--text-faint)">最近洞察</td><td id="st-last-insight">-</td></tr>
+        </tbody></table></div>
+      </div>
+      <div style="margin-top:16px"><button class="btn" onclick="loadDashboard()">🔄 刷新状态</button></div>
+    </div>
+
+    <!-- ── Operations ── -->
+    <div id="page-operations" class="page">
+      <div class="page-header"><h2>操作中心</h2><p>执行爬取、分析、生成报告等操作</p></div>
+
+      <div class="card">
+        <div class="card-header">🔍 数据爬取</div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">选择爬取平台</label>
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <button class="btn btn-sm" onclick="toggleAllPlatforms(true)">全选</button>
+              <button class="btn btn-sm" onclick="toggleAllPlatforms(false)">全不选</button>
+            </div>
+            <div class="platform-grid" id="fetch-platform-grid"><p style="color:var(--text-faint);padding:20px">加载中...</p></div>
+            <div class="form-hint">未选择任何平台时将爬取全部启用平台</div>
+          </div>
+          <button class="btn btn-primary" id="btn-fetch" onclick="doFetch()">▶ 开始爬取</button>
+          <div class="progress-bar" id="fetch-progress" style="display:none"><div class="progress-bar-fill animated" style="width:100%"></div></div>
+          <div class="op-status" id="fetch-status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📊 分析报告</div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-sec);margin-bottom:12px">基于已有数据生成分析报告（Markdown / HTML / 邮件）</p>
+          <button class="btn btn-primary" id="btn-analyze" onclick="doAnalyze()">▶ 生成分析报告</button>
+          <div class="progress-bar" id="analyze-progress" style="display:none"><div class="progress-bar-fill animated" style="width:100%"></div></div>
+          <div class="op-status" id="analyze-status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">✏️ Prompt 生成</div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">分析天数</label>
+            <input type="number" class="form-input" id="prompt-days" value="10" min="1" max="30" style="width:120px">
+          </div>
+          <button class="btn btn-primary" id="btn-prompt" onclick="doPrompt()">▶ 生成 Prompt</button>
+          <div class="progress-bar" id="prompt-progress" style="display:none"><div class="progress-bar-fill animated" style="width:100%"></div></div>
+          <div class="op-status" id="prompt-status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">⚡ 完整工作流</div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-sec);margin-bottom:12px">爬取 → Prompt 生成 → 分析报告 + AI 洞察（并行）</p>
+          <button class="btn btn-success" id="btn-workflow" onclick="doWorkflow()">▶ 执行完整工作流</button>
+          <div class="progress-bar" id="workflow-progress" style="display:none"><div class="progress-bar-fill animated" style="width:100%"></div></div>
+          <div class="op-status" id="workflow-status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">🕐 定时任务</div>
+        <div class="card-body">
+          <div id="sched-status-card" class="sched-status-card inactive">
+            <span class="sched-indicator off" id="sched-indicator"></span>
+            <span id="sched-status-text">调度器未启动</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">调度模式</label>
+            <select class="form-select" id="sched-type" style="width:200px">
+              <option value="cron">Cron 定时（每天固定时间）</option>
+              <option value="interval">Interval 间隔（固定周期）</option>
+            </select>
+          </div>
+          <div id="sched-cron-group">
+            <div class="form-group">
+              <label class="form-label">执行时间点（HH:MM）</label>
+              <div class="cron-tags" id="cron-tags"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input type="time" class="form-input" id="cron-new-time" style="width:140px" value="08:00">
+                <button class="btn btn-sm" onclick="addCronTime()">+ 添加</button>
+              </div>
+              <div class="form-hint">支持多个时间点，每个时间点独立触发一次完整工作流</div>
+            </div>
+          </div>
+          <div id="sched-interval-group" style="display:none">
+            <div class="form-group">
+              <label class="form-label">执行间隔</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="number" class="form-input" id="sched-interval" min="5" max="1440" value="60" style="width:120px">
+                <span style="font-size:13px;color:var(--text-sec)">分钟</span>
+              </div>
+              <div class="form-hint">每隔指定分钟执行一次完整工作流</div>
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top:12px">
+            <button class="btn btn-success" id="btn-sched-start" onclick="doSchedulerStart()">▶ 应用并启动</button>
+            <button class="btn btn-danger" id="btn-sched-stop" onclick="doScheduler('stop')">■ 停止定时</button>
+          </div>
+          <div class="op-status" id="scheduler-status"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Platforms ── -->
+    <div id="page-platforms" class="page">
+      <div class="page-header"><h2>平台管理</h2><p>管理爬虫平台的启用/禁用状态及爬取数量</p></div>
+      <div class="card"><div class="card-body" id="platform-mgmt-list"><p style="color:var(--text-faint)">加载中...</p></div></div>
+      <div class="sticky-save-bar"><button class="btn btn-primary" onclick="savePlatforms()">💾 保存平台配置</button></div>
+    </div>
+
+    <!-- ── User Config ── -->
+    <div id="page-user-config" class="page">
+      <div class="page-header"><h2>用户配置</h2><p>可视化编辑用户配置参数，修改后即时生效</p></div>
+      <div class="card"><div class="card-body">
+        <!-- 通知配置 -->
+        <div class="form-section">
+          <div class="form-section-title">📧 通知配置</div>
+          <div class="form-group"><label class="form-label">启用邮件通知</label><label class="switch"><input type="checkbox" id="uc-email-enabled" onchange="toggleConfigGroup('email')"><span class="slider"></span></label></div>
+          <div id="email-config-group" class="config-collapsible" style="display:none">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">SMTP 服务器</label><input class="form-input" id="uc-smtp-server" placeholder="smtp.qq.com"></div>
+              <div class="form-group"><label class="form-label">SMTP 端口</label><input class="form-input" id="uc-smtp-port" type="number" placeholder="465"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">发件人邮箱</label><input class="form-input" id="uc-email-sender" placeholder="sender@qq.com"></div>
+              <div class="form-group"><label class="form-label">SMTP 授权码</label><input class="form-input" id="uc-email-password" type="password" placeholder="授权码"></div>
+            </div>
+            <div class="form-group"><label class="form-label">收件人列表（逗号分隔）</label><input class="form-input" id="uc-email-recipients" placeholder="a@qq.com, b@qq.com"></div>
+          </div>
+        </div>
+        <!-- 分析配置 -->
+        <div class="form-section">
+          <div class="form-section-title">📊 分析配置</div>
+          <div class="form-group"><label class="form-label">保存报告到文件</label><label class="switch"><input type="checkbox" id="uc-analysis-save" onchange="toggleConfigGroup('analysis')"><span class="slider"></span></label></div>
+          <div id="analysis-config-group" class="config-collapsible" style="display:none">
+            <div class="form-group"><label class="form-label">输出目录</label><input class="form-input" id="uc-analysis-dir" placeholder="outputs/analysis"></div>
+          </div>
+        </div>
+        <!-- LLM 分析配置 -->
+        <div class="form-section">
+          <div class="form-section-title">🤖 LLM 分析配置</div>
+          <div class="form-group"><label class="form-label">启用 LLM 分析</label><label class="switch"><input type="checkbox" id="uc-llm-enabled" onchange="toggleConfigGroup('llm')"><span class="slider"></span></label></div>
+          <div id="llm-config-group" class="config-collapsible" style="display:none">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">推理模式</label><select class="form-select" id="uc-llm-mode" onchange="toggleLLMMode()"><option value="local">本地模型</option><option value="api">远程 API</option></select></div>
+              <div class="form-group"><label class="form-label">推理设备</label><select class="form-select" id="uc-llm-device"><option value="auto">自动检测</option><option value="cuda">GPU</option><option value="cpu">CPU</option></select></div>
+            </div>
+            <div id="uc-llm-local-group"><div class="form-group"><label class="form-label">模型名称 / 路径</label><input class="form-input" id="uc-llm-model" placeholder="qwen/Qwen2.5-3B-Instruct"><div class="form-hint">支持 ModelScope ID 或本地路径</div></div></div>
+            <div id="uc-llm-api-group" style="display:none">
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" id="uc-llm-api-url" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1"></div>
+                <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="uc-llm-api-key" type="password"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">API 模型</label><input class="form-input" id="uc-llm-api-model" placeholder="qwen3.5-flash"></div>
+                <div class="form-group"><label class="form-label">Batch Size</label><input class="form-input" id="uc-llm-batch" type="number" placeholder="20"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- AI 洞察报告 -->
+        <div class="form-section">
+          <div class="form-section-title">💡 AI 洞察报告</div>
+          <div class="form-group"><label class="form-label">启用 AI 洞察</label><label class="switch"><input type="checkbox" id="uc-insight-enabled" onchange="toggleConfigGroup('insight')"><span class="slider"></span></label></div>
+          <div id="insight-config-group" class="config-collapsible" style="display:none">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input" id="uc-insight-api-url" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1"></div>
+              <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="uc-insight-api-key" type="password"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">API 模型</label><input class="form-input" id="uc-insight-model" placeholder="qwen3.6-plus"></div>
+              <div class="form-group"><label class="form-label">分析天数</label><input class="form-input" id="uc-insight-days" type="number" placeholder="3"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="uc-insight-tokens" type="number" placeholder="8000"></div>
+              <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="uc-insight-temp" type="number" step="0.1" placeholder="0.7"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">超时（秒）</label><input class="form-input" id="uc-insight-timeout" type="number" placeholder="300"></div>
+              <div class="form-group"><label class="form-label">最大重试次数</label><input class="form-input" id="uc-insight-retries" type="number" placeholder="2"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Prompt 配置 -->
+        <div class="form-section">
+          <div class="form-section-title">📝 Prompt 配置</div>
+          <div class="form-group"><label class="form-label">自动生成 Prompt</label><label class="switch"><input type="checkbox" id="uc-prompt-auto" onchange="toggleConfigGroup('prompt')"><span class="slider"></span></label></div>
+          <div id="prompt-config-group" class="config-collapsible" style="display:none">
+            <div class="form-group"><label class="form-label">输出目录</label><input class="form-input" id="uc-prompt-dir" placeholder="outputs/prompts"></div>
+          </div>
+        </div>
+        <!-- 日志配置 -->
+        <div class="form-section">
+          <div class="form-section-title">📡 日志配置</div>
+          <div class="form-group"><label class="form-label">日志级别</label><select class="form-select" id="uc-log-level" style="width:160px"><option value="DEBUG">DEBUG</option><option value="INFO">INFO</option><option value="WARNING">WARNING</option><option value="ERROR">ERROR</option></select></div>
+          <div class="form-group"><label class="form-label">控制台输出</label><label class="switch"><input type="checkbox" id="uc-log-console"><span class="slider"></span></label></div>
+          <div class="form-group"><label class="form-label">文件输出</label><label class="switch"><input type="checkbox" id="uc-log-file"><span class="slider"></span></label></div>
+        </div>
+        <!-- 服务配置 -->
+        <div class="form-section">
+          <div class="form-section-title">⚙ 服务配置</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">服务端口</label><input class="form-input" id="uc-service-port" type="number" placeholder="5000" style="width:140px"></div>
+            <div class="form-group"><label class="form-label">API 密钥</label><input class="form-input" id="uc-service-apikey" type="password" placeholder="留空则不启用鉴权"><div class="form-hint">设置后所有 API 请求需携带 X-API-Key</div></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="sticky-save-bar"><button class="btn btn-primary" id="btn-save-user-config" onclick="saveUserConfig()">💾 保存用户配置</button><span id="uc-save-status" style="margin-left:14px;font-size:13px"></span></div>
+    </div>
+
+    <!-- ── File Manager ── -->
+    <div id="page-outputs" class="page">
+      <div class="page-header"><h2>文件管理</h2><p>管理输出文件与热搜数据，支持查看、下载和删除</p></div>
+      <div class="card"><div class="card-body" style="padding:10px 16px">
+        <div class="output-toolbar">
+          <div class="output-filters" id="output-filters">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="analysis">📊 分析报告</button>
+            <button class="filter-btn" data-filter="insight">💡 AI 洞察</button>
+            <button class="filter-btn" data-filter="prompts">📝 Prompt</button>
+            <button class="filter-btn" data-filter="hotsearch">🔍 热搜数据</button>
+          </div>
+          <button class="btn btn-sm" onclick="loadOutputs()">🔄 刷新</button>
+        </div>
+        <div class="date-filter-bar">
+          <div class="date-filter-label">📅 日期筛选</div>
+          <div class="date-filter-quick">
+            <button class="date-quick-btn active" data-range="all">全部</button>
+            <button class="date-quick-btn" data-range="today">今天</button>
+            <button class="date-quick-btn" data-range="7d">近7天</button>
+            <button class="date-quick-btn" data-range="30d">近30天</button>
+          </div>
+          <div class="date-filter-custom">
+            <input type="date" class="date-input" id="date-start" title="开始日期">
+            <span class="date-sep">—</span>
+            <input type="date" class="date-input" id="date-end" title="结束日期">
+            <button class="btn btn-sm" onclick="applyDateFilter()">确定</button>
+            <button class="btn btn-sm btn-ghost" onclick="clearDateFilter()">清除</button>
+          </div>
+        </div>
+      </div></div>
+      <div id="output-file-list"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>加载中...</p></div></div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">🗑️ 数据清理</div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-sec);margin-bottom:14px">基于连续密度函数：近端密集保留，远端稀疏过渡，平滑衰减</p>
+          <div class="cleanup-form">
+            <div class="cleanup-field">
+              <label class="form-label">保留天数</label>
+              <input type="number" class="form-input" id="cleanup-days" value="30" min="1" max="365" style="width:100px">
+              <span class="cleanup-hint">时间轴跨度</span>
+            </div>
+            <div class="cleanup-field">
+              <label class="form-label">近端密度上限</label>
+              <input type="number" class="form-input" id="cleanup-max-files" value="80" min="1" max="999" style="width:100px">
+              <span class="cleanup-hint">今天每天最多保留数</span>
+            </div>
+            <button class="btn btn-danger" onclick="doCleanup()">🗑️ 执行清理</button>
+          </div>
+          <div class="op-status" id="cleanup-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Reports ── -->
+    <div id="page-reports" class="page">
+      <div class="page-header"><h2>报告展示</h2><p>浏览热搜分析报告，支持预览与全屏查看</p></div>
+      <div class="card"><div class="card-body" style="padding:10px 16px">
+        <div class="report-toolbar">
+          <div class="report-filter">
+            <label class="form-label" style="margin:0;font-size:13px">📅 日期筛选</label>
+            <select class="form-select" id="report-date-filter" style="width:140px" onchange="filterReports()">
+              <option value="all">全部</option>
+              <option value="today">今天</option>
+              <option value="7d">近7天</option>
+              <option value="30d">近30天</option>
+            </select>
+          </div>
+          <button class="btn btn-sm" onclick="loadReports()">🔄 刷新</button>
+        </div>
+      </div></div>
+      <div id="report-container"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>加载中...</p></div></div>
+    </div>
+
+    <!-- ── Config Editor ── -->
+    <div id="page-config-editor" class="page">
+      <div class="page-header"><h2>配置编辑</h2><p>直接编辑 YAML 配置文件，适合高级用户</p></div>
+      <div class="card"><div class="card-body">
+        <div class="form-group">
+          <label class="form-label">选择配置文件</label>
+          <select class="form-select" id="config-file-select" onchange="loadConfigFile()" style="width:360px">
+            <option value="">-- 请选择 --</option>
+            <option value="user_config">user_config.yaml（用户配置）</option>
+            <option value="analytics_config">analytics_config.yaml（分析配置）</option>
+            <option value="platform_configs">platform_configs.yaml（平台配置）</option>
+            <option value="headers_config">headers_config.yaml（请求头配置）</option>
+          </select>
+        </div>
+        <div class="form-group" id="config-editor-wrap" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <label class="form-label" style="margin:0" id="config-filename-display"></label>
+            <button class="btn btn-primary btn-sm" onclick="saveConfigFile()">💾 保存</button>
+          </div>
+          <textarea class="form-textarea" id="config-editor" spellcheck="false"></textarea>
+          <div id="config-status"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── Logs ── -->
+    <div id="page-logs" class="page">
+      <div class="page-header"><h2>日志查看</h2><p>查看最近的运行日志</p></div>
+      <div class="card"><div class="card-body">
+        <div class="form-group"><div class="log-toolbar">
+          <div class="log-toolbar-left">
+            <label class="form-label" style="margin:0">显示行数：</label>
+            <select class="form-select" id="log-lines" style="width:100px">
+              <option value="100">100</option><option value="200">200</option>
+              <option value="500" selected>500</option><option value="1000">1000</option>
+            </select>
+            <button class="btn btn-sm" onclick="loadLogs()">🔄 刷新</button>
+            <button class="btn btn-sm" onclick="autoScrollLogs()">⬇ 滚动到底部</button>
+          </div>
+          <div class="log-toolbar-right">
+            <span id="log-file-info" style="font-size:12px;color:var(--text-faint)"></span>
+            <button class="btn btn-sm btn-ghost-danger" onclick="clearLogs()">🗑 清除日志</button>
+          </div>
+        </div></div>
+        <div class="log-viewer" id="log-viewer">加载中...</div>
+      </div></div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- Shortcuts bar -->
+  <div class="shortcuts-bar">
+    <span><span class="kbd">Ctrl+1~7</span> 切换页面</span>
+    <span><span class="kbd">Esc</span> 关闭弹窗 / 取消焦点</span>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- File viewer modal -->
+<div class="modal-overlay" id="file-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">文件预览</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="/static/gui.js?v=15"></script>
+</body>
+</html>
