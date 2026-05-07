@@ -117,6 +117,3 @@ services:
 networks:
   hotsearch-network:
     driver: bridge
-
-volumes:
-  # redis-data:
