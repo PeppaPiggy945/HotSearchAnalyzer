@@ -16,19 +16,18 @@ ENV PYTHONUNBUFFERED=1 \
     SERVICE_PORT=8080 \
     TZ=Asia/Shanghai
 
-# 安装系统依赖（git: modelscope下载模型需要）
-RUN apt-get update && apt-get install -y \
+# 换国内 Debian 源 + 安装系统依赖
+RUN sed -i 's|deb.debian.org|mirrors.tencent.com|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && apt-get install -y \
     gcc \
     g++ \
     curl \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制依赖文件
+# 换国内 pip 源 + 安装Python依赖
 COPY requirements.txt .
-
-# 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -i https://mirrors.tencent.com/pypi/simple/ -r requirements.txt
 
 # 复制项目文件
 COPY . .
