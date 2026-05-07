@@ -537,10 +537,13 @@
 
   /* ---- User Config ---- */
   Pages.UserConfig = {
+    _rawConfig: null,  // 缓存原始配置（未mask），保存时用于还原敏感字段
     async load() {
       try {
         const res = await http.get('/api/config-files/user_config');
         const c = res.data?.data; if (!c) return;
+        // 缓存原始数据，保存时用于还原被mask的敏感字段
+        this._rawConfig = res.data?.raw || null;
         setEl('uc-email-enabled', c.notification?.email?.enabled);
         setEl('uc-smtp-server', c.notification?.email?.smtp_server);
         setEl('uc-smtp-port', c.notification?.email?.smtp_port);
@@ -610,14 +613,27 @@
       try {
         const recipients = (getVal('uc-email-recipients') || '').split(/[,，]/).map(s => s.trim()).filter(Boolean);
         const emailEnabled = getVal('uc-email-enabled');
+
+        // 从 raw 配置还原被 mask 的敏感字段（用户未修改时值为 ***HIDDEN***）
+        let rawParsed = {};
+        if (this._rawConfig) {
+          try { rawParsed = jsyaml.load(this._rawConfig); } catch(e) {}
+        }
+        const _keepIfHidden = (inputVal, ...rawPath) => {
+          if (inputVal !== '***HIDDEN***') return inputVal;
+          let v = rawParsed;
+          for (const k of rawPath) v = v?.[k];
+          return v ?? '';
+        };
+
         const config = {
-          notification: { enabled: emailEnabled, email: { enabled: emailEnabled, smtp_server: getVal('uc-smtp-server'), smtp_port: getVal('uc-smtp-port'), sender: getVal('uc-email-sender'), password: getVal('uc-email-password'), recipients } },
+          notification: { enabled: emailEnabled, email: { enabled: emailEnabled, smtp_server: getVal('uc-smtp-server'), smtp_port: getVal('uc-smtp-port'), sender: getVal('uc-email-sender'), password: _keepIfHidden(getVal('uc-email-password'), 'notification', 'email', 'password'), recipients } },
           analysis: { report: { save_to_file: getVal('uc-analysis-save'), output_dir: getVal('uc-analysis-dir') } },
-          llm: { enabled: getVal('uc-llm-enabled'), mode: getVal('uc-llm-mode'), device: getVal('uc-llm-device'), model_name: getVal('uc-llm-model'), api_base_url: getVal('uc-llm-api-url'), api_key: getVal('uc-llm-api-key'), api_model: getVal('uc-llm-api-model'), batch_size: getVal('uc-llm-batch'), max_new_tokens: 10, temperature: 0.1 },
-          ai_insight: { enabled: getVal('uc-insight-enabled'), days: getVal('uc-insight-days') || 3, api_base_url: getVal('uc-insight-api-url'), api_key: getVal('uc-insight-api-key'), api_model: getVal('uc-insight-model'), max_tokens: getVal('uc-insight-tokens') || 8000, temperature: getVal('uc-insight-temp') || 0.7, timeout: getVal('uc-insight-timeout') || 300, max_retries: getVal('uc-insight-retries') || 2, report: { output_dir: 'outputs/insight', filename_prefix: 'ai_insight' }, preprocessing: { enabled: true, min_heat_score: 10, max_events_detail: 40, similarity_threshold: 0.55 } },
+          llm: { enabled: getVal('uc-llm-enabled'), mode: getVal('uc-llm-mode'), device: getVal('uc-llm-device'), model_name: getVal('uc-llm-model'), api_base_url: getVal('uc-llm-api-url'), api_key: _keepIfHidden(getVal('uc-llm-api-key'), 'llm', 'api_key'), api_model: getVal('uc-llm-api-model'), batch_size: getVal('uc-llm-batch'), max_new_tokens: 10, temperature: 0.1 },
+          ai_insight: { enabled: getVal('uc-insight-enabled'), days: getVal('uc-insight-days') || 3, api_base_url: getVal('uc-insight-api-url'), api_key: _keepIfHidden(getVal('uc-insight-api-key'), 'ai_insight', 'api_key'), api_model: getVal('uc-insight-model'), max_tokens: getVal('uc-insight-tokens') || 8000, temperature: getVal('uc-insight-temp') || 0.7, timeout: getVal('uc-insight-timeout') || 300, max_retries: getVal('uc-insight-retries') || 2, report: { output_dir: 'outputs/insight', filename_prefix: 'ai_insight' }, preprocessing: { enabled: true, min_heat_score: 10, max_events_detail: 40, similarity_threshold: 0.55 } },
           prompt: { auto_generate: getVal('uc-prompt-auto'), output_dir: getVal('uc-prompt-dir'), template: 'templates/analysis_prompt.md' },
           logging: { level: getVal('uc-log-level'), console: getVal('uc-log-console'), file: getVal('uc-log-file'), file_path: 'logs/service.log' },
-          service: { port: getVal('uc-service-port') || 5000, api_key: getVal('uc-service-apikey') || '' },
+          service: { port: getVal('uc-service-port') || 5000, api_key: _keepIfHidden(getVal('uc-service-apikey'), 'service', 'api_key') },
           keyword_tracking: { enabled: true, groups: [{ name: '游戏', keywords: [{ name: '王者荣耀', keywords: ['KPL', '王者荣耀'] }] }, { name: '国际局势', keywords: [{ name: '美国', keywords: ['美国', '特朗普'] }, { name: '中东', keywords: ['中东', '伊朗'] }] }], max_matches_per_keyword: 5 },
         };
         const yamlContent = YamlGen.generate(config);

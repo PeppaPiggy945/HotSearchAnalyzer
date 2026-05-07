@@ -63,9 +63,18 @@ def get_config_file(key):
         parsed = yaml.safe_load(raw) or {}
         should_mask = CONFIG_REGISTRY[key].get('mask', False)
 
+        if should_mask:
+            # service.api_key 不 mask（前端需要用它鉴权，且保存时需保留原值）
+            masked = mask_sensitive(parsed)
+            if isinstance(parsed.get('service', {}), dict):
+                masked.setdefault('service', {})['api_key'] = parsed.get('service', {}).get('api_key', '')
+            data = masked
+        else:
+            data = parsed
+
         return jsonify(success_response({
             'raw': raw,
-            'data': mask_sensitive(parsed) if should_mask else parsed,
+            'data': data,
             'filename': CONFIG_REGISTRY[key]['path'],
         }))
     except Exception as e:
