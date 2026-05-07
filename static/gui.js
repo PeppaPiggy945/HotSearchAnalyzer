@@ -622,6 +622,13 @@
         };
         const yamlContent = YamlGen.generate(config);
         await http.put('/api/config-files/user_config', { content: yamlContent });
+        // 保存成功后，若 service.api_key 有变更则同步前端鉴权状态
+        const newServiceKey = config.service.api_key || '';
+        if (newServiceKey && newServiceKey !== state.apiKey) {
+          ApiKeyManager.setKey(newServiceKey);
+        } else if (!newServiceKey && state.apiKey) {
+          ApiKeyManager.clearKey();
+        }
         $('#uc-save-status').innerHTML = '<span style="color:var(--green)">&#10003; 已保存</span>';
         Toast.success('用户配置已保存并生效');
       } catch (e) {
