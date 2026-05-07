@@ -490,12 +490,6 @@ find outputs/ -name "*.json" -mtime +30 -delete
 
 本项目采用 MIT 许可证 - 详见 LICENSE 文件
 
-## 联系方式
-
-- 项目主页：[GitHub Repository]
-- 问题反馈：[Issues]
-- 邮箱：[your-email@example.com]
-
 ## 致谢
 
 感谢所有为本项目做出贡献的开发者！
