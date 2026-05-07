@@ -42,49 +42,50 @@ services:
       - hotsearch-network
 
   # GPU 版本（需要宿主机安装 nvidia-container-toolkit）
-  # 使用: docker compose -f docker-compose.yml up hotsearch-gpu
-  hotsearch-gpu:
-    build:
-      context: .
-      dockerfile: Dockerfile.gpu
-    container_name: hotsearch-gpu
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./outputs:/app/outputs
-      - ./logs:/app/logs
-      - ./config:/app/config
-      - ./.llm_cache:/app/.llm_cache
-      - ./.model_cache:/app/.model_cache
-    environment:
-      - HOTSEARCH_ENVIRONMENT=production
-      - HOTSEARCH_LOG_LEVEL=INFO
-      - SERVICE_PORT=8080
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
-      - QWEN_API_KEY=${QWEN_API_KEY:-}
-      - SMTP_SERVER=${SMTP_SERVER:-smtp.qq.com}
-      - SMTP_PORT=${SMTP_PORT:-465}
-      - SENDER_EMAIL=${SENDER_EMAIL:-}
-      - SENDER_PASSWORD=${SENDER_PASSWORD:-}
-      - RECIPIENT_EMAILS=${RECIPIENT_EMAILS:-}
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-    networks:
-      - hotsearch-network
+  # 使用: docker compose up hotsearch-gpu
+  # 注意: GPU 镜像构建较复杂，默认不启动。需要时取消下方注释。
+  # hotsearch-gpu:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.gpu
+  #   container_name: hotsearch-gpu
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./outputs:/app/outputs
+  #     - ./logs:/app/logs
+  #     - ./config:/app/config
+  #     - ./.llm_cache:/app/.llm_cache
+  #     - ./.model_cache:/app/.model_cache
+  #   environment:
+  #     - HOTSEARCH_ENVIRONMENT=production
+  #     - HOTSEARCH_LOG_LEVEL=INFO
+  #     - SERVICE_PORT=8080
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+  #     - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
+  #     - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+  #     - QWEN_API_KEY=${QWEN_API_KEY:-}
+  #     - SMTP_SERVER=${SMTP_SERVER:-smtp.qq.com}
+  #     - SMTP_PORT=${SMTP_PORT:-465}
+  #     - SENDER_EMAIL=${SENDER_EMAIL:-}
+  #     - SENDER_PASSWORD=${SENDER_PASSWORD:-}
+  #     - RECIPIENT_EMAILS=${RECIPIENT_EMAILS:-}
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 5s
+  #   networks:
+  #     - hotsearch-network
 
   # 可选：Redis缓存
   # redis:
