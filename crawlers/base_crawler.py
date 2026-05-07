@@ -4,6 +4,7 @@
 
 
 import time
+import random
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from datetime import datetime
@@ -104,11 +105,15 @@ class BaseCrawler(ABC):
         last_exception = None
         for attempt in range(retries):
             try:
-                # 遵守请求间隔
+                # 遵守请求间隔 + 随机抖动
                 if hasattr(self, '_last_request_time'):
                     elapsed = time.time() - self._last_request_time
-                    if elapsed < self.request_delay:
-                        time.sleep(self.request_delay - elapsed)
+                    delay = self.request_delay + random.uniform(0, 0.5)
+                    if elapsed < delay:
+                        time.sleep(delay - elapsed)
+
+                # 每次请求随机更换 User-Agent
+                self.session.headers['User-Agent'] = self._generate_user_agent()
 
                 response = self.session.request(
                     method=method,
