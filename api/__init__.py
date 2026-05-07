@@ -114,6 +114,10 @@ def run_api_server(host: str = '0.0.0.0', port: int = None, debug: bool = False)
         port: 端口号，为空则从配置读取
         debug: 调试模式
     """
+    import os
+    # 禁用 werkzeug 日志颜色（避免 Docker/文件中出现 ANSI 转义码乱码）
+    os.environ['NO_COLOR'] = '1'
+
     service = get_service()
     config_port = service.config.get('service', {}).get('port', 5000)
 
