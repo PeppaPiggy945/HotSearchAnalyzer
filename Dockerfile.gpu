@@ -24,7 +24,6 @@ RUN sed -i 's|archive.ubuntu.com|mirrors.tencent.com|g; s|security.ubuntu.com|mi
     python3.12 \
     python3.12-venv \
     python3.12-dev \
-    python3.12-distutils \
     gcc \
     g++ \
     curl \
@@ -32,8 +31,7 @@ RUN sed -i 's|archive.ubuntu.com|mirrors.tencent.com|g; s|security.ubuntu.com|mi
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
-    && python3.12 -m ensurepip --upgrade \
-    && python3.12 -m pip install --upgrade pip
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
 
 # 设置工作目录
 WORKDIR /app
