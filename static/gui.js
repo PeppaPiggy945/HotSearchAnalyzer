@@ -24,6 +24,7 @@
     currentConfigKey: '',
     autoRefreshTimer: null,
     apiKey: null,
+    kwGroups: [],  // [{name, keywords: ['kw1','kw2']}]
   };
 
   /* ================================================================
@@ -550,6 +551,12 @@
         setEl('uc-email-sender', c.notification?.email?.sender);
         setEl('uc-email-password', c.notification?.email?.password);
         setEl('uc-email-recipients', (c.notification?.email?.recipients || []).join(', '));
+        // 关键词追踪
+        setEl('uc-kw-enabled', c.keyword_tracking?.enabled);
+        state.kwGroups = Array.isArray(c.keyword_tracking?.groups) ? c.keyword_tracking.groups.map(g => ({ name: g.name || '', keywords: Array.isArray(g.keywords) ? g.keywords : [] })) : [];
+        setEl('uc-kw-max-matches', c.keyword_tracking?.max_matches_per_keyword);
+        this.renderKwGroups();
+        // 分析配置
         setEl('uc-analysis-save', c.analysis?.report?.save_to_file);
         setEl('uc-analysis-dir', c.analysis?.report?.output_dir);
         setEl('uc-llm-enabled', c.llm?.enabled);
@@ -584,6 +591,8 @@
     initCollapsibleStates(c) {
       // 邮件通知
       this.toggleGroup('email', c.notification?.email?.enabled);
+      // 关键词追踪
+      this.toggleGroup('keyword', c.keyword_tracking?.enabled);
       // 分析配置
       this.toggleGroup('analysis', c.analysis?.report?.save_to_file);
       // LLM 分析
@@ -605,6 +614,89 @@
       const apiGrp = $('#uc-llm-api-group');
       if (localGrp) localGrp.style.display = m === 'api' ? 'none' : 'block';
       if (apiGrp) apiGrp.style.display = m === 'api' ? 'block' : 'none';
+    },
+
+    renderKwGroups() {
+      const container = $('#kw-groups-container');
+      if (!container) return;
+      if (state.kwGroups.length === 0) {
+        container.innerHTML = '<p style="font-size:13px;color:var(--text-faint);margin-bottom:12px">暂无关键词分组，点击下方添加</p>';
+        return;
+      }
+      let html = '';
+      state.kwGroups.forEach((group, gi) => {
+        const kwTags = group.keywords.map((kw, ki) =>
+          `<span class="cron-tag">${escHtml(kw)}<span class="cron-tag-remove" data-gi="${gi}" data-ki="${ki}">&times;</span></span>`
+        ).join('');
+        html += `<div class="kw-group-card">
+          <div class="kw-group-header">
+            <input class="form-input kw-group-name" data-gi="${gi}" value="${escAttr(group.name)}" placeholder="分组名称" style="width:160px;font-weight:600">
+            <span class="kw-group-del" data-gi="${gi}" title="删除分组">&times;</span>
+          </div>
+          <div class="kw-tags">${kwTags}</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <input class="form-input kw-new-input" data-gi="${gi}" placeholder="输入关键词，回车添加" style="width:180px">
+            <button class="btn btn-sm kw-add-btn" data-gi="${gi}">添加</button>
+          </div>
+        </div>`;
+      });
+      container.innerHTML = html;
+
+      // 绑定事件
+      $$('.kw-group-del', container).forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.kwGroups.splice(parseInt(btn.dataset.gi), 1);
+          this.renderKwGroups();
+        });
+      });
+      $$('.kw-group-name', container).forEach(input => {
+        input.addEventListener('change', () => {
+          state.kwGroups[parseInt(input.dataset.gi)].name = input.value.trim();
+        });
+      });
+      $$('.cron-tag-remove', container).forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const gi = parseInt(el.dataset.gi);
+          const ki = parseInt(el.dataset.ki);
+          state.kwGroups[gi].keywords.splice(ki, 1);
+          this.renderKwGroups();
+        });
+      });
+      $$('.kw-add-btn', container).forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gi = parseInt(btn.dataset.gi);
+          const input = $(`.kw-new-input[data-gi="${gi}"]`, container);
+          const val = input.value.trim();
+          if (!val) return;
+          if (state.kwGroups[gi].keywords.includes(val)) { Toast.error('关键词已存在'); return; }
+          state.kwGroups[gi].keywords.push(val);
+          this.renderKwGroups();
+        });
+      });
+      $$('.kw-new-input', container).forEach(input => {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const gi = parseInt(input.dataset.gi);
+            const val = input.value.trim();
+            if (!val) return;
+            if (state.kwGroups[gi].keywords.includes(val)) { Toast.error('关键词已存在'); return; }
+            state.kwGroups[gi].keywords.push(val);
+            this.renderKwGroups();
+          }
+        });
+      });
+    },
+
+    addKwGroup() {
+      const input = $('#kw-new-group-name');
+      const name = input.value.trim();
+      if (!name) { Toast.error('请输入分组名称'); return; }
+      if (state.kwGroups.some(g => g.name === name)) { Toast.error('分组名称已存在'); return; }
+      state.kwGroups.push({ name, keywords: [] });
+      input.value = '';
+      this.renderKwGroups();
     },
 
     async save() {
@@ -634,7 +726,7 @@
           prompt: { auto_generate: getVal('uc-prompt-auto'), output_dir: getVal('uc-prompt-dir'), template: 'templates/analysis_prompt.md' },
           logging: { level: getVal('uc-log-level'), console: getVal('uc-log-console'), file: getVal('uc-log-file'), file_path: 'logs/service.log' },
           service: { port: getVal('uc-service-port') || 5000, api_key: _keepIfHidden(getVal('uc-service-apikey'), 'service', 'api_key') },
-          keyword_tracking: { enabled: true, groups: [{ name: '游戏', keywords: [{ name: '王者荣耀', keywords: ['KPL', '王者荣耀'] }] }, { name: '国际局势', keywords: [{ name: '美国', keywords: ['美国', '特朗普'] }, { name: '中东', keywords: ['中东', '伊朗'] }] }], max_matches_per_keyword: 5 },
+          keyword_tracking: { enabled: getVal('uc-kw-enabled'), groups: state.kwGroups, max_matches_per_keyword: getVal('uc-kw-max-matches') || 5 },
         };
         const yamlContent = YamlGen.generate(config);
         await http.put('/api/config-files/user_config', { content: yamlContent });
@@ -1294,7 +1386,6 @@
           for (const [k, v] of Object.entries(item)) {
             if (k === 'name') continue;
             if (Array.isArray(v)) out += pad + '    ' + k + ': [' + v.map(x => `'${x}'`).join(', ') + ']\n';
-            else if (typeof v === 'object') out += pad + '    ' + k + ':\n' + pad + '      name: \'' + (v.name || '') + '\'\n' + pad + '      keywords: [' + (v.keywords || []).map(x => `'${x}'`).join(', ') + ']\n';
             else out += pad + '    ' + k + ': ' + (typeof v === 'boolean' ? v : `'${v}'`) + '\n';
           }
         });
@@ -1398,6 +1489,7 @@
     window.doScheduler = (action) => action === 'stop' ? Pages.Operations.doSchedulerStop() : null;
     window.savePlatforms = () => Pages.Platforms.save();
     window.saveUserConfig = () => Pages.UserConfig.save();
+    window.addKwGroup = () => Pages.UserConfig.addKwGroup();
     window.loadConfigFile = () => Pages.ConfigEditor.loadFile();
     window.saveConfigFile = () => Pages.ConfigEditor.saveFile();
     window.loadLogs = () => Pages.Logs.load();
@@ -1413,7 +1505,7 @@
     window.filterReports = () => Pages.Reports.filterByDate();
     // 配置折叠切换
     window.toggleConfigGroup = (name) => {
-      const checkbox = $(`#uc-${name === 'email' ? 'email-enabled' : name === 'analysis' ? 'analysis-save' : name === 'llm' ? 'llm-enabled' : name === 'insight' ? 'insight-enabled' : 'prompt-auto'}`);
+      const checkbox = $(`#uc-${name === 'email' ? 'email-enabled' : name === 'keyword' ? 'kw-enabled' : name === 'analysis' ? 'analysis-save' : name === 'llm' ? 'llm-enabled' : name === 'insight' ? 'insight-enabled' : 'prompt-auto'}`);
       const enabled = checkbox?.checked;
       Pages.UserConfig.toggleGroup(name, enabled);
     };

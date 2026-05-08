@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HotSearch Crawler — 管理面板</title>
-  <link rel="stylesheet" href="/static/gui.css?v=11">
+  <link rel="stylesheet" href="/static/gui.css?v=12">
 </head>
 <body>
 
@@ -190,6 +190,22 @@
               <div class="form-group"><label class="form-label">SMTP 授权码</label><input class="form-input" id="uc-email-password" type="password" placeholder="授权码"></div>
             </div>
             <div class="form-group"><label class="form-label">收件人列表（逗号分隔）</label><input class="form-input" id="uc-email-recipients" placeholder="a@qq.com, b@qq.com"></div>
+          </div>
+        </div>
+        <!-- 关键词追踪 -->
+        <div class="form-section">
+          <div class="form-section-title">🎯 关键词追踪</div>
+          <div class="form-group"><label class="form-label">启用关键词追踪</label><label class="switch"><input type="checkbox" id="uc-kw-enabled" onchange="toggleConfigGroup('keyword')"><span class="slider"></span></label></div>
+          <div id="keyword-config-group" class="config-collapsible" style="display:none">
+            <div id="kw-groups-container"></div>
+            <div style="display:flex;gap:8px;margin-bottom:16px">
+              <input class="form-input" id="kw-new-group-name" placeholder="新分组名称" style="width:160px">
+              <button class="btn btn-sm" onclick="addKwGroup()">+ 添加分组</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">每词最大匹配数</label>
+              <input class="form-input" id="uc-kw-max-matches" type="number" min="1" max="50" value="5" style="width:100px">
+            </div>
           </div>
         </div>
         <!-- 分析配置 -->
@@ -420,6 +436,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-<script src="/static/gui.js?v=16"></script>
+<script src="/static/gui.js?v=17"></script>
 </body>
 </html>

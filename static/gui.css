@@ -675,6 +675,29 @@ tr:hover td { background: var(--bg-card-hover); }
 .cron-tag-remove { cursor: pointer; color: var(--text-faint); font-size: 14px; margin-left: 2px; transition: color var(--transition); }
 .cron-tag-remove:hover { color: var(--red); }
 
+/* ── Keyword Tracking ── */
+.kw-group-card {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+  background: var(--bg-inset);
+  transition: border-color var(--transition);
+}
+.kw-group-card:hover { border-color: var(--accent); }
+.kw-group-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.kw-group-del {
+  margin-left: auto; cursor: pointer; font-size: 18px; color: var(--text-faint); transition: color var(--transition); line-height: 1; user-select: none;
+}
+.kw-group-del:hover { color: var(--red); }
+.kw-group-header .form-input {
+  font-size: 14px; padding: 6px 10px; background: var(--bg-card);
+}
+.kw-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.kw-add-btn { flex-shrink: 0; }
+
 /* ── Scheduler Status ── */
 .sched-status-card { padding: 14px 18px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; font-size: 13px; }
 .sched-status-card.active { background: var(--green-bg); border-color: var(--green); }
